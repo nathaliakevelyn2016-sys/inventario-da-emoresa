@@ -1,0 +1,51 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "Details about a product in inventory.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Product name"
+        },
+        "sku": {
+          "type": "string",
+          "description": "Stock Keeping Unit"
+        },
+        "stock": {
+          "type": "integer",
+          "description": "Current quantity in stock"
+        },
+        "price": {
+          "type": "number",
+          "description": "Unit price"
+        },
+        "supplier": {
+          "type": "string",
+          "description": "Product supplier"
+        },
+        "category": {
+          "type": "string",
+          "description": "Product category"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Owner user ID"
+        }
+      },
+      "required": ["name", "stock", "price", "ownerId"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Main collection for products"
+    }
+  }
+}

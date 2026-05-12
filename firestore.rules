@@ -1,0 +1,55 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // Product Validation
+    function isValidProduct(data) {
+      return data.keys().hasAll(['name', 'stock', 'price', 'ownerId', 'updatedAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
+             data.sku is string && data.sku.size() <= 50 &&
+             data.stock is int &&
+             data.price is number &&
+             data.supplier is string && data.supplier.size() <= 100 &&
+             data.category is string && data.category.size() <= 100 &&
+             data.ownerId == request.auth.uid &&
+             data.updatedAt is timestamp;
+    }
+
+    match /products/{productId} {
+      allow list: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      allow get: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      
+      allow create: if isSignedIn() && 
+                    isValidId(productId) &&
+                    isValidProduct(request.resource.data) &&
+                    request.resource.data.updatedAt == request.time;
+      
+      allow update: if isSignedIn() &&
+                    isOwner(resource.data.ownerId) &&
+                    isValidProduct(request.resource.data) &&
+                    request.resource.data.updatedAt == request.time &&
+                    request.resource.data.ownerId == resource.data.ownerId; // Immutable owner
+
+      allow delete: if isSignedIn() && isOwner(resource.data.ownerId);
+    }
+  }
+}
