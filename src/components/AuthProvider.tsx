@@ -14,8 +14,6 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   loginWithGoogle: () => Promise<void>;
-  loginWithEmail: (email: string, pass: string) => Promise<void>;
-  registerWithEmail: (email: string, pass: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -37,14 +35,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await signInWithPopup(auth, provider);
   };
 
-  const loginWithEmail = async (email: string, pass: string) => {
-    await signInWithEmailAndPassword(auth, email, pass);
-  };
-
-  const registerWithEmail = async (email: string, pass: string) => {
-    await createUserWithEmailAndPassword(auth, email, pass);
-  };
-
   const logout = async () => {
     await signOut(auth);
   };
@@ -54,8 +44,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user, 
       loading, 
       loginWithGoogle, 
-      loginWithEmail, 
-      registerWithEmail, 
       logout 
     }}>
       {children}
